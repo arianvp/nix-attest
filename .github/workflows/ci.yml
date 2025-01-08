@@ -32,9 +32,9 @@ jobs:
       - id: get-subject
         run:  |
           set -o pipefail
-          narHash=$(jq -r '.[0].value.narHash' "$statementPath")
+          narHash=$(jq -r '.subject[0].digest.narHash' "$statementPath")
           subjectDigest=$(nix hash convert --to base16 "$narHash")
-          subjectName=$(jq -r '.[0].key' "$statementPath")
+          subjectName=$(jq -r '.subject[0].name' "$statementPath")
           echo "subject-digest=sha256:$subjectDigest" >> "$GITHUB_OUTPUT"
           echo "subject-name=$subjectName" >> "$GITHUB_OUTPUT"
           jq '.predicate' "$statementPath" > predicate.slsa.json
