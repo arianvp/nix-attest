@@ -35,7 +35,7 @@ mkdir -p /nix/var/nix/provenance/nix/store
 jq -n \
     --argjson derivation "$derivation" \
     --argjson resolvedInputs "$resolvedInputs" \
-    --arjson subject "$subject" \
+    --argjson subject "$subject" \
     '{
         "_type": "https://in-toto.io/Statement/v1",
         "subject": $subject,
