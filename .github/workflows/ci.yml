@@ -8,10 +8,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     outputs:
       path-info: ${{ steps.build.outputs.path-info }}
     steps:
       - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
       - uses: actions/checkout@v4
       - id: build
         env:
@@ -24,20 +27,6 @@ jobs:
         with:
           name: provenance
           path: /nix/var/nix/provenance/*
-  attest:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      id-token: write
-    steps:
-      # TODO: Make a custom action for this. We want to have a list of subject digests. One for
-      # each output. We can't do that with the current action. So we just assume that there
-      # is only one output.
-      - uses: DeterminateSystems/nix-installer-action@main
-      - uses: actions/download-artifact@v4
-        with:
-          name: provenance
-
       # NOTE: the attestation contains multiple subjects (one for each output)
       # but the actions/attest action only supports one subject. So we need to
       # pick one. We pick the first one.
@@ -52,14 +41,9 @@ jobs:
           subjectName=$(jq -r '.[0].key' "$statementPath")
           echo "subject-digest=sha256:$subjectDigest" >> "$GITHUB_OUTPUT"
           echo "subject-name=$subjectName" >> "$GITHUB_OUTPUT"
-        env:
-          statementPath: "./${{fromJson(needs.build.outputs.path-info)[0].value.deriver}}.slsa.json"
-      # NOTE: we're throwing away the subjects here
-      - run: |
-          set -o pipefail
           jq '.predicate' "$statementPath" > predicate.slsa.json
         env:
-          statementPath: "./${{fromJson(needs.build.outputs.path-info)[0].value.deriver}}.slsa.json"
+          statementPath: "/nix/var/nix/provenance/${{fromJson(steps.build.outputs.path-info)[0].value.deriver}}.slsa.json"
       - uses: actions/attest@v2
         with:
           subject-name: ${{ steps.get-subject.outputs.subject-name }}
