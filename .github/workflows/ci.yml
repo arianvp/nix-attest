@@ -33,24 +33,39 @@ jobs:
       # TODO: Make a custom action for this. We want to have a list of subject digests. One for
       # each output. We can't do that with the current action. So we just assume that there
       # is only one output.
+      - uses: DeterminateSystems/nix-installer-action@main
       - uses: actions/download-artifact@v4
         with:
           name: provenance
-      - id: convert-digest
-        run: echo "digest=sha256:$(nix hash convert --to base16 "$narHash")" >> "$GITHUB_OUTPUT"
+
+      # NOTE: the attestation contains multiple subjects (one for each output)
+      # but the actions/attest action only supports one subject. So we need to
+      # pick one. We pick the first one.
+      # TODO: Make a custom action for this that does support multiple actions
+      # NOTE: We're using the NAR hash here, not the SRI hash. So a verifier should
+      # get the NAR serialisation of the nix store path for verification.
+      - id: get-subject
+        run:  |
+          set -o pipefail
+          narHash=$(jq -r '.[0].value.narHash' "$statementPath")
+          subjectDigest=$(nix hash convert --to base16 "$narHash")
+          subjectName=$(jq -r '.[0].key' "$statementPath")
+          echo "subject-digest=sha256:$subjectDigest" >> "$GITHUB_OUTPUT"
+          echo "subject-name=$subjectName" >> "$GITHUB_OUTPUT"
         env:
-          narHash: ${{ fromJson(needs.build.outputs.path-info)[0].value.narHash }}
+          statementPath: "./${{fromJson(needs.build.outputs.path-info)[0].value.deriver}}.slsa.json"
       # NOTE: we're throwing away the subjects here
       - run: |
+          set -o pipefail
           jq '.predicate' "$statementPath" > predicate.slsa.json
         env:
           statementPath: "./${{fromJson(needs.build.outputs.path-info)[0].value.deriver}}.slsa.json"
       - uses: actions/attest@v2
         with:
-          subject-name: ${{ fromJson(needs.build.outputs.path-info)[0].key }}
+          subject-name: ${{ steps.get-subject.outputs.subject-name }}
           # NOTE: This is the NAR hash, not the SRI hash. So a verifier should
           # get the NAR serialisation of the nix store path
           # TODO: Should we name NAR files differently?
-          subject-digest: ${{ steps.convert-digest.outputs.digest }} 
+          subject-digest: ${{ steps.get-subject.outputs.subject-digest }}
           predicate-type: https://slsa.dev/provenance/v1
           predicate-path: predicate.slsa.json
