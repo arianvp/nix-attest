@@ -22,7 +22,8 @@ jq() {
     "$nix" run nixpkgs/nixos-24.11#jq -- "$@"
 }
 
-#subject=$(nix path-info $OUT_PATHS --json | jq 'map({name:.path,digest:{narHash:.narHash}, annotations:.})')
+# TODO: What to do with narHash? do we want to do sha256: here and use the NAR file?
+subject=$(nix path-info $OUT_PATHS --json | jq 'map({name:.path,digest:{narHash:.narHash}, annotations:.})')
 derivation=$("$nix" derivation show "$DRV_PATH" | jq --arg DRV_PATH "$DRV_PATH" '.[$DRV_PATH]')
 inputDrvs=$(jq -r -n --argjson derivation "$derivation" '$derivation.inputDrvs | to_entries | map(.key as $key | .value.outputs[]|"\($key)^\(.)")[]')
 inputSrcs=$(jq -r -n --argjson derivation "$derivation" '$derivation.inputSrcs[]')
@@ -34,12 +35,17 @@ mkdir -p /nix/var/nix/provenance
 jq -n \
     --argjson derivation "$derivation" \
     --argjson resolvedInputs "$resolvedInputs" \
+    --arjson subject "$subject" \
     '{
-        "buildType": "https//nixos.org/slsa/v1",
-        "externalParameters": {
-            "derivation":  $derivation,
-        },
-        "internalParameters": {},
-        "resolvedDependencies": $resolvedInputs | map({name:.path,digest:{narHash:.narHash}, annotations:.}),
-    }' > "/nix/var/nix/provenance/$(basename "$DRV_PATH").slsa.json"
+        "_type": "https://in-toto.io/Statement/v1",
+        "subject": $subject,
+        "predicate": {
+            "buildType": "https//nixos.org/slsa/v1",
+            "externalParameters": {
+                "derivation":  $derivation,
+            },
+            "internalParameters": {},
+            "resolvedDependencies": $resolvedInputs | map({name:.path,digest:{narHash:.narHash}, annotations:.}),
+        }
+    }' > "/nix/var/nix/provenance/$DRV_PATH.slsa.json"
 
