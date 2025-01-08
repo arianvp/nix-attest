@@ -21,7 +21,7 @@ jobs:
           installable: .#example^*
         run: |
           set -o pipefail
-          build=$(nix --accept-flake-config build --json "$installable"))
+          build=$(nix --accept-flake-config build --json "$installable")
           echo "build=$build" >> "$GITHUB_OUTPUT"
       # NOTE: the attestation contains multiple subjects (one for each output)
       # but the actions/attest action only supports one subject. So we need to
