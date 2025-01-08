@@ -18,7 +18,7 @@ jobs:
           installable: .#example^*
         run: |
           set -o pipefail
-          pathInfo=$(nix --accept-flake-config build --print-build-logs --print-out-paths "$installable" | xargs nix path-info --json | jq 'to_entries')
+          pathInfo=$(nix --accept-flake-config build --print-build-logs --print-out-paths "$installable" | xargs nix path-info --json | jq -c 'to_entries')
           echo "path-info=$pathInfo" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v4
         with:
