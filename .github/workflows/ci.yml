@@ -21,12 +21,8 @@ jobs:
           installable: .#example^*
         run: |
           set -o pipefail
-          pathInfo=$(nix --accept-flake-config build --print-build-logs --print-out-paths "$installable" | xargs nix path-info --json | jq -c 'to_entries')
-          echo "path-info=$pathInfo" >> "$GITHUB_OUTPUT"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: provenance
-          path: /nix/var/nix/provenance/*
+          build=$(nix --accept-flake-config build --json "$installable"))
+          echo "build=$build" >> "$GITHUB_OUTPUT"
       # NOTE: the attestation contains multiple subjects (one for each output)
       # but the actions/attest action only supports one subject. So we need to
       # pick one. We pick the first one.
@@ -43,7 +39,8 @@ jobs:
           echo "subject-name=$subjectName" >> "$GITHUB_OUTPUT"
           jq '.predicate' "$statementPath" > predicate.slsa.json
         env:
-          statementPath: "/nix/var/nix/provenance/${{fromJson(steps.build.outputs.path-info)[0].value.deriver}}.slsa.json"
+          # TODO: maybe we should generate a statement per outPath instead of per drv
+          statementPath: "/nix/var/nix/provenance/${{fromJson(steps.build.outputs.build)[0].drvPath}}.slsa.json"
       - uses: actions/attest@v2
         with:
           subject-name: ${{ steps.get-subject.outputs.subject-name }}
