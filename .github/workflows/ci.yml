@@ -18,6 +18,7 @@ jobs:
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - uses: actions/checkout@v4
       - id: build
+        name: Build
         env:
           installable: .#example^*
         run: |
@@ -31,9 +32,11 @@ jobs:
       # NOTE: We're using the NAR hash here, not the SRI hash. So a verifier should
       # get the NAR serialisation of the nix store path for verification.
       - id: get-subject
+        name: Get subject
         run:  |
           set -o pipefail
           set -x
+          jq '.' "$statementPath"
           narHash=$(jq -r '.subject[0].digest.narHash' "$statementPath")
           subjectDigest=$(nix hash convert --to base16 "$narHash")
           subjectName=$(jq -r '.subject[0].name' "$statementPath")
