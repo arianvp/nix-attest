@@ -1,0 +1,25 @@
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: actions/checkout@v4
+      - id: build
+        run:
+          out_path=$(nix build .#example --accept-flake-config --print-out-paths)
+          echo "out_path=$out_path" >> "$GITHUB_OUTPUT"
+          echo "name=$(basename $out_path)" >> "$GITHUB_OUTPUT"
+          echo "hash=$(nix hash path $out_path) >> "$GITHUB_OUTPUT"
+      - uses: actions/attest@v2
+        with:
+          subject-name: ${{ steps.build.outputs.out_path }}
+          subject-digest: ${{ steps.build.outputs.hash }} 
+          predicate-type: https://slsa.dev/provenance/v1
+          predicate-path: /nix/var/nix/provenance/${{ steps.build.outputs.name }}.slsa.json
