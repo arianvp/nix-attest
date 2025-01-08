@@ -35,21 +35,28 @@ jobs:
         name: Get subject
         run:  |
           set -o pipefail
-          narHash=$(jq -r '.subject[0].digest.narHash' "$statementPath")
-          subjectDigest=$(nix hash convert --to base16 "$narHash")
+          subjectDigest=$(jq -r '.subject[0].digest.sha256' "$statementPath")
           subjectName=$(jq -r '.subject[0].name' "$statementPath")
           echo "subject-digest=sha256:$subjectDigest" >> "$GITHUB_OUTPUT"
           echo "subject-name=$subjectName" >> "$GITHUB_OUTPUT"
           jq '.predicate' "$statementPath" > predicate.slsa.json
         env:
           # TODO: maybe we should generate a statement per outPath instead of per drv
+          subjectName:
           statementPath: "/nix/var/nix/provenance${{fromJson(steps.build.outputs.build)[0].drvPath}}.slsa.json"
-      - uses: actions/attest@v2
+      - name: Attest
+        uses: actions/attest@v2
         with:
           subject-name: ${{ steps.get-subject.outputs.subject-name }}
           # NOTE: This is the NAR hash, not the SRI hash. So a verifier should
           # get the NAR serialisation of the nix store path
           # TODO: Should we name NAR files differently?
           subject-digest: ${{ steps.get-subject.outputs.subject-digest }}
-          predicate-type: https//nixos.org/slsa/v1
+          predicate-type: https://slsa.dev/provenance/v1
           predicate-path: predicate.slsa.json
+      - name: Verify
+        run: |
+          set -o pipefail
+          gh attestation verify --repo $GITHUB_REPOSITORY <(nix store dump-path)
+        env:
+          outPath: ${{ steps.build.outputs.build[0].outPath }}
