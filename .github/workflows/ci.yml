@@ -35,8 +35,6 @@ jobs:
         name: Get subject
         run:  |
           set -o pipefail
-          set -x
-          jq '.' "$statementPath"
           narHash=$(jq -r '.subject[0].digest.narHash' "$statementPath")
           subjectDigest=$(nix hash convert --to base16 "$narHash")
           subjectName=$(jq -r '.subject[0].name' "$statementPath")
