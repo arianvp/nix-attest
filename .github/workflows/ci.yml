@@ -12,11 +12,15 @@ jobs:
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: actions/checkout@v4
       - id: build
-        run:
+        run: |
           out_path=$(nix build .#example --accept-flake-config --print-out-paths)
-          echo "out_path=$out_path" >> "$GITHUB_OUTPUT"
-          echo "name=$(basename $out_path)" >> "$GITHUB_OUTPUT"
-          echo "hash=$(nix hash path $out_path) >> "$GITHUB_OUTPUT"
+          basename=$(basename "$out_path")
+          hash=$(nix hash path "$out_path")
+          {
+            echo "out_path=$out_path" 
+            echo "name=$basename"
+            echo "hash=$hash"
+          } >> "$GITHUB_OUTPUT"
       - uses: actions/attest@v2
         with:
           subject-name: ${{ steps.build.outputs.out_path }}
