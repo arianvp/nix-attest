@@ -23,7 +23,7 @@ jq() {
 }
 
 # TODO: What to do with narHash? do we want to do sha256: here and use the NAR file?
-subject=$(nix path-info $OUT_PATHS --json | jq 'map({name:.path,digest:{narHash:.narHash}, annotations:.})')
+subject=$("$nix" path-info $OUT_PATHS --json | jq 'map({name:.path,digest:{narHash:.narHash}, annotations:.})')
 derivation=$("$nix" derivation show "$DRV_PATH" | jq --arg DRV_PATH "$DRV_PATH" '.[$DRV_PATH]')
 inputDrvs=$(jq -r -n --argjson derivation "$derivation" '$derivation.inputDrvs | to_entries | map(.key as $key | .value.outputs[]|"\($key)^\(.)")[]')
 inputSrcs=$(jq -r -n --argjson derivation "$derivation" '$derivation.inputSrcs[]')
