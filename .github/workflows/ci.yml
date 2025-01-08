@@ -16,16 +16,16 @@ jobs:
           out_path=$(nix build -L .#example --accept-flake-config --print-out-paths)
           drv=$(nix path-info --derivation .#example)
           drvName=$(basename "$drv")
-          hash=$(nix hash path "$out_path")
+          digest="sha256:$(nix hash path --type sha256 --format base16 --mode nar  "$out_path")"
           {
             echo "out-path=$out_path" 
             echo "drv-name=$drvName"
-            echo "hash=$hash"
+            echo "digest=$digest"
           } >> "$GITHUB_OUTPUT"
     outputs:
       out-path: ${{ steps.build.outputs.out-path }}
       drv-name: ${{ steps.build.outputs.drv-name }}
-      hash: ${{ steps.build.outputs.hash }}
+      digest: ${{ steps.build.outputs.digest0 }}
   attest:
     runs-on: ubuntu-latest
     needs: build
@@ -34,7 +34,7 @@ jobs:
     steps:
       - uses: actions/attest@v2
         with:
-          subject-name: ${{ needs.build.outputs.drv-name }}
-          subject-digest: ${{ needs.build.outputs.hash }} 
+          subject-name: ${{ needs.build.outputs.out-path }}
+          subject-digest: ${{ needs.build.outputs.digest }} 
           predicate-type: https://slsa.dev/provenance/v1
           predicate-path: /nix/var/nix/provenance/${{ needs.build.outputs.drv-name }}.slsa.json
