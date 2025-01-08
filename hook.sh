@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 set -euo pipefail
 set -f
@@ -47,19 +47,32 @@ done | jq -s .)
 mkdir -p /nix/var/nix/provenance/nix/store
 
 jq -n \
+    --arg builderId "$GITHUB_SERVER_URL/$GITHUB_WORKFLOW_REF" \
+    --arg invocationId "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
     --argjson derivation "$derivation" \
     --argjson resolvedDependencies "$resolvedDependencies" \
     --argjson subject "$subjects" \
     '{
         "_type": "https://in-toto.io/Statement/v1",
         "subject": $subject,
+        "predicateType": "https://slsa.dev/provenance/v1",
         "predicate": {
-            "buildType": "https://slsa.dev/provenance/v1",
-            "externalParameters": {
-                "derivation":  $derivation,
+            "buildDefinition": {
+                "buildType": "https://nixos.org/build/v1
+                "externalParameters": {
+                    "derivation":  $derivation,
+                },
+                "internalParameters": {},
+                "resolvedDependencies": $resolvedDependencies
             },
-            "internalParameters": {},
-            "resolvedDependencies": $resolvedDependencies
+            "runDetails": {
+                "builder": {
+                    "id": $builderId
+                },
+                "metadata": {
+                    "invocationId": $invocationId
+                },
+            },
         }
     }' > "/nix/var/nix/provenance$DRV_PATH.slsa.json"
 
