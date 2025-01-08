@@ -41,5 +41,5 @@ jq -n \
         },
         "internalParameters": {},
         "resolvedDependencies": $resolvedInputs | map({name:.path,digest:{narHash:.narHash}, annotations:.}),
-    }' > /nix/var/nix/provenance/$(basename "$DRV_PATH").slsa.json
+    }' > "/nix/var/nix/provenance/$(basename "$DRV_PATH").slsa.json"
 
