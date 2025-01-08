@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
+      attestations: write
     outputs:
       path-info: ${{ steps.build.outputs.path-info }}
     steps:
