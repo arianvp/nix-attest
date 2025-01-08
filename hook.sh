@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
 
-set -eu
-set -o pipefail
+set -euo pipefail
 set -f
-
-# TODO: pipefail
 
 export IFS=' '
 
@@ -32,7 +29,7 @@ jq() {
 subjects=$(for path in $OUT_PATHS; do
     subject=$("$nix" path-info "$path" --json | jq --arg path "$path" '.[$path]| {name:$path, digest:{narHash:.narHash}, annotations:.}')
     narHash=$(echo "$subject" | jq -r '.digest.narHash')
-    sha256="sha256:$(nix hash convert --to base16 "$narHash")"
+    sha256="$("$nix" hash convert --to base16 "$narHash")"
     echo "$subject" | jq --arg sha256 "$sha256" '.digest.sha256=$sha256'
 done  | jq -s .)
 derivation=$("$nix" derivation show "$DRV_PATH" | jq --arg DRV_PATH "$DRV_PATH" '.[$DRV_PATH]')
