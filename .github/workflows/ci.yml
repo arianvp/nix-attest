@@ -17,9 +17,7 @@ jobs:
         env:
           installable: .#example^*
         run: |
-          pathInfo=$(nix --accept-flake-config \
-            build --print-build-logs --print-out-paths \
-            "$installable" | xargs nix path-info --json | jq 'to_entries')
+          pathInfo=$(nix --accept-flake-config build --print-build-logs --print-out-paths "$installable" | xargs nix path-info --json | jq 'to_entries')
           {
             echo "path-info=$pathInfo"
           } >> "$GITHUB_OUTPUT"

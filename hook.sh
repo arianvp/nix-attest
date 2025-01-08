@@ -30,7 +30,7 @@ inputSrcs=$(jq -r -n --argjson derivation "$derivation" '$derivation.inputSrcs[]
 
 resolvedInputs=$({ echo "$inputDrvs" ; echo "$inputSrcs"; } | xargs "$nix" path-info --json | jq '.')
 
-mkdir -p /nix/var/nix/provenance
+mkdir -p /nix/var/nix/provenance/nix/store
 
 jq -n \
     --argjson derivation "$derivation" \
@@ -47,5 +47,5 @@ jq -n \
             "internalParameters": {},
             "resolvedDependencies": $resolvedInputs | map({name:.path,digest:{narHash:.narHash}, annotations:.}),
         }
-    }' > "/nix/var/nix/provenance/$DRV_PATH.slsa.json"
+    }' > "/nix/var/nix/provenance$DRV_PATH.slsa.json"
 
