@@ -40,10 +40,10 @@ inputDrvs=$(jq -r -n --argjson derivation "$derivation" '$derivation.inputDrvs |
 inputSrcs=$(jq -r -n --argjson derivation "$derivation" '$derivation.inputSrcs[]')
 #resolvedInputs=$({ echo "$inputDrvs" ; echo "$inputSrcs"; } | xargs "$nix" path-info --json | jq 'to_entries')
 
-resolvedDependencies=$(echo "$inputDrvs" | while IFS= read -r path; do
+resolvedDependencies=$({ echo "$inputDrvs"; echo "$inputSrcs"; } | while IFS= read -r path; do
     dep=$("$nix" path-info "$path" --json | jq 'to_entries | map({name:.key, digest:{narHash:.value.narHash}, annotations:.value})[]')
     narHash=$(echo "$dep" | jq -r '.digest.narHash')
-    sha256="sha256:$(nix hash convert --to base16 "$narHash")"
+    sha256="sha256:$("$nix" hash convert --to base16 "$narHash")"
     echo "$dep" | jq --arg sha256 "$sha256" '.digest.sha256=$sha256'
 done | jq -s .)
 
