@@ -19,7 +19,7 @@ fi
 
 # TODO: package this hook as a package
 jq() {
-    "$nix" run nixpkgs#jq -- "$@"
+    "$nix" run nixpkgs/nixos-24.11#jq -- "$@"
 }
 
 #subject=$(nix path-info $OUT_PATHS --json | jq 'map({name:.path,digest:{narHash:.narHash}, annotations:.})')
