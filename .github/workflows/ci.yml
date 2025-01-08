@@ -33,6 +33,7 @@ jobs:
       - id: get-subject
         run:  |
           set -o pipefail
+          set -x
           narHash=$(jq -r '.subject[0].digest.narHash' "$statementPath")
           subjectDigest=$(nix hash convert --to base16 "$narHash")
           subjectName=$(jq -r '.subject[0].name' "$statementPath")
@@ -41,7 +42,7 @@ jobs:
           jq '.predicate' "$statementPath" > predicate.slsa.json
         env:
           # TODO: maybe we should generate a statement per outPath instead of per drv
-          statementPath: "/nix/var/nix/provenance/${{fromJson(steps.build.outputs.build)[0].drvPath}}.slsa.json"
+          statementPath: "/nix/var/nix/provenance${{fromJson(steps.build.outputs.build)[0].drvPath}}.slsa.json"
       - uses: actions/attest@v2
         with:
           subject-name: ${{ steps.get-subject.outputs.subject-name }}
