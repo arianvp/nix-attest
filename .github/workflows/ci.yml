@@ -23,7 +23,19 @@ jobs:
           installable: .#example^*
         run: |
           set -o pipefail
-          build=$(nix --accept-flake-config build --json --print-build-logs "$installable")
+          hook=$(nix build .#hook --print-out-paths)
+
+          new_hook=$(mktemp)
+          cat <<EOF > "$new_hook"
+          #!/bin/sh
+          builderId="$GITHUB_SERVER_URL/$GITHUB_WORKFLOW_REF"
+          invocationId="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          export builderId invocationId
+          exec "$hook" "\$@"
+          EOF
+          chmod +x "$new_hook"
+
+          build=$(nix --post-build-hook "$new_hook" build --json --print-build-logs "$installable")
           echo "build=$build" >> "$GITHUB_OUTPUT"
       # NOTE: the attestation contains multiple subjects (one for each output)
       # but the actions/attest action only supports one subject. So we need to

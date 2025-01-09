@@ -47,8 +47,6 @@ done | jq -s .)
 mkdir -p /nix/var/nix/provenance/nix/store
 
 jq -n \
-    --arg builderId "$GITHUB_SERVER_URL/$GITHUB_WORKFLOW_REF" \
-    --arg invocationId "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
     --argjson derivation "$derivation" \
     --argjson resolvedDependencies "$resolvedDependencies" \
     --argjson subject "$subjects" \
@@ -67,10 +65,10 @@ jq -n \
             },
             "runDetails": {
                 "builder": {
-                    "id": $builderId
+                    "id": $ENV.builderId
                 },
                 "metadata": {
-                    "invocationId": $invocationId
+                    "invocationId": $ENV.invocationId
                 },
             },
         }

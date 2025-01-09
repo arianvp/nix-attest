@@ -7,7 +7,7 @@
       inherit (nixpkgs) lib;
     in
     {
-
+      hook = ./hook.sh;
       packages = lib.genAttrs lib.systems.flakeExposed (
         system: with nixpkgs.legacyPackages.${system}; {
           example =
