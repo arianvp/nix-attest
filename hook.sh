@@ -53,7 +53,7 @@ jq -n \
     '{
         "_type": "https://in-toto.io/Statement/v1",
         "subject": $subject,
-        "predicateType": "https://slsa.dev/provenance/v1",
+        "predicateType": "https://nixos.org/provenance/v1",
         "predicate": {
             "buildDefinition": {
                 "buildType": "https://nixos.org/build/v1",
