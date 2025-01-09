@@ -56,9 +56,9 @@ jq -n \
         "predicateType": "https://slsa.dev/provenance/v1",
         "predicate": {
             "buildDefinition": {
-                "buildType": "https://nixos.org/build/v1
+                "buildType": "https://nixos.org/build/v1",
                 "externalParameters": {
-                    "derivation":  $derivation,
+                    "derivation":  $derivation
                 },
                 "internalParameters": {},
                 "resolvedDependencies": $resolvedDependencies
