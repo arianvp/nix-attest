@@ -74,3 +74,4 @@ jobs:
           gh attestation verify --repo "$GITHUB_REPOSITORY" <(nix store dump-path "$outPath")
         env:
           outPath: ${{ steps.build.outputs.build[0].outPath }}
+          GH_TOKEN: ${{ github.token }}
