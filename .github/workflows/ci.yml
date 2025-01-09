@@ -71,7 +71,6 @@ jobs:
       - name: Verify
         run: |
           set -o pipefail
-          gh attestation verify --repo "$GITHUB_REPOSITORY" <(nix store dump-path "$outPath")
+          gh attestation verify --repo "$GITHUB_REPOSITORY" <(nix store dump-path .#example)
         env:
-          outPath: ${{ steps.build.outputs.build[0].outPath }}
           GH_TOKEN: ${{ github.token }}
