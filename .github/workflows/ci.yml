@@ -14,8 +14,7 @@ jobs:
     outputs:
       path-info: ${{ steps.build.outputs.path-info }}
     steps:
-      - uses: DeterminateSystems/nix-installer-action@main
-      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: DeterminateSystems/nix-installer-action@v16
       - uses: actions/checkout@v4
       - id: build
         name: Build
