@@ -2,6 +2,8 @@
 
 There are few levels of provenance that we're interested in.
 
+Currently this post-build-hook records  Build-time provenance.
+
 ## Eval-time provenance
 
 What were the evaluation-time inputs to produce the resulting derivation?
