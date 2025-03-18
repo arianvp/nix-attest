@@ -1,0 +1,139 @@
+{
+  "_type": "https://in-toto.io/Statement/v1",
+  "subject": [
+    {
+      "name": "/nix/store/cffxgv437dl607rfc1l5i1np1r68kfhz-example",
+      "digest": {
+        "narHash": "sha256-hRPiBmmpjgZiqCTwg9y3rq/UbVh6ELnyK8D5rGLdD1Q=",
+        "sha256": "8513e20669a98e0662a824f083dcb7aeafd46d587a10b9f22bc0f9ac62dd0f54"
+      }
+    }
+  ],
+  "predicateType": "https://slsa.dev/provenance/v1",
+  "predicate": {
+    "buildDefinition": {
+      "buildType": "https://nixos.org/build/v1",
+      "externalParameters": {
+        "derivation": {
+          "args": [
+            "-e",
+            "/nix/store/v6x3cs394jgqfbi0a42pam708flxaphh-default-builder.sh"
+          ],
+          "builder": "/nix/store/7dkrmf9gqhwl6cz766s26j3k4a6z0n00-bash-5.2p37/bin/bash",
+          "env": {
+            "__darwinAllowLocalNetworking": "",
+            "__impureHostDeps": "/bin/sh /usr/lib/libSystem.B.dylib /usr/lib/system/libunc.dylib /dev/zero /dev/random /dev/urandom /bin/sh",
+            "__propagatedImpureHostDeps": "",
+            "__propagatedSandboxProfile": "",
+            "__sandboxProfile": "",
+            "__structuredAttrs": "",
+            "allowSubstitutes": "1",
+            "buildCommand": "target=$out/bin/example\nmkdir -p \"$(dirname \"$target\")\"\n\nif [ -e \"$textPath\" ]; then\n  mv \"$textPath\" \"$target\"\nelse\n  echo -n \"$text\" > \"$target\"\nfi\n\nif [ -n \"$executable\" ]; then\n  chmod +x \"$target\"\nfi\n\neval \"$checkPhase\"\n",
+            "buildInputs": "",
+            "builder": "/nix/store/7dkrmf9gqhwl6cz766s26j3k4a6z0n00-bash-5.2p37/bin/bash",
+            "checkPhase": "runHook preCheck\n/nix/store/7dkrmf9gqhwl6cz766s26j3k4a6z0n00-bash-5.2p37/bin/bash -n -O extglob \"$target\"\n# use shellcheck which does not include docs\n# pandoc takes long to build and documentation isn't needed for just running the cli\n/nix/store/way9m6fd20k2c3qnlynw0khvzmisb88p-ShellCheck-0.10.0/bin/shellcheck  \"$target\"\n\nrunHook postCheck\n",
+            "cmakeFlags": "",
+            "configureFlags": "",
+            "depsBuildBuild": "",
+            "depsBuildBuildPropagated": "",
+            "depsBuildTarget": "",
+            "depsBuildTargetPropagated": "",
+            "depsHostHost": "",
+            "depsHostHostPropagated": "",
+            "depsTargetTarget": "",
+            "depsTargetTargetPropagated": "",
+            "doCheck": "",
+            "doInstallCheck": "",
+            "enableParallelBuilding": "1",
+            "enableParallelChecking": "1",
+            "enableParallelInstalling": "1",
+            "executable": "1",
+            "mesonFlags": "",
+            "name": "example",
+            "nativeBuildInputs": "",
+            "out": "/nix/store/cffxgv437dl607rfc1l5i1np1r68kfhz-example",
+            "outputs": "out",
+            "passAsFile": "buildCommand text",
+            "patches": "",
+            "preferLocalBuild": "",
+            "propagatedBuildInputs": "",
+            "propagatedNativeBuildInputs": "",
+            "stdenv": "/nix/store/51yymgyq0sa8l9f0m15qhwy7vy8wrij9-stdenv-darwin",
+            "strictDeps": "",
+            "system": "aarch64-darwin",
+            "text": "#!/nix/store/7dkrmf9gqhwl6cz766s26j3k4a6z0n00-bash-5.2p37/bin/bash\nset -o errexit\nset -o nounset\nset -o pipefail\n\necho \"Hello, world!\"\n\n"
+          },
+          "inputDrvs": {
+            "/nix/store/30bc33lfjwll4y0ysh6927gm9igzl6k2-ShellCheck-0.10.0.drv": {
+              "dynamicOutputs": {},
+              "outputs": [
+                "out"
+              ]
+            },
+            "/nix/store/3mgx880zqsjky17y0m55f95yv2mnci8f-bash-5.2p37.drv": {
+              "dynamicOutputs": {},
+              "outputs": [
+                "out"
+              ]
+            },
+            "/nix/store/dms1pb9z6gpniiaj57qw2w7a194igymp-stdenv-darwin.drv": {
+              "dynamicOutputs": {},
+              "outputs": [
+                "out"
+              ]
+            }
+          },
+          "inputSrcs": [
+            "/nix/store/v6x3cs394jgqfbi0a42pam708flxaphh-default-builder.sh"
+          ],
+          "name": "example",
+          "outputs": {
+            "out": {
+              "path": "/nix/store/cffxgv437dl607rfc1l5i1np1r68kfhz-example"
+            }
+          },
+          "system": "aarch64-darwin"
+        }
+      },
+      "internalParameters": {},
+      "resolvedDependencies": [
+        {
+          "name": "/nix/store/way9m6fd20k2c3qnlynw0khvzmisb88p-ShellCheck-0.10.0",
+          "digest": {
+            "narHash": "sha256-emevZtDNbU3XKk+ZZ8JcDJx25K3hdENdvOtxCOHr4Hc=",
+            "sha256": "sha256:7a67af66d0cd6d4dd72a4f9967c25c0c9c76e4ade174435dbceb7108e1ebe077"
+          }
+        },
+        {
+          "name": "/nix/store/7dkrmf9gqhwl6cz766s26j3k4a6z0n00-bash-5.2p37",
+          "digest": {
+            "narHash": "sha256-NIBNeyK18KeYR1rqx6fVXAR7EtEznmzwp5Hhm25j+1U=",
+            "sha256": "sha256:34804d7b22b5f0a798475aeac7a7d55c047b12d1339e6cf0a791e19b6e63fb55"
+          }
+        },
+        {
+          "name": "/nix/store/51yymgyq0sa8l9f0m15qhwy7vy8wrij9-stdenv-darwin",
+          "digest": {
+            "narHash": "sha256-tj3Hz8QaTx1daHSIeb09TMlkcrjBbf7EqyzMDZFU7Fo=",
+            "sha256": "sha256:b63dc7cfc41a4f1d5d68748879bd3d4cc96472b8c16dfec4ab2ccc0d9154ec5a"
+          }
+        },
+        {
+          "name": "/nix/store/v6x3cs394jgqfbi0a42pam708flxaphh-default-builder.sh",
+          "digest": {
+            "narHash": "sha256-xkptKYg9VT+X7az0GF+r+leFEv/PnduJHHmDC2kEbPw=",
+            "sha256": "sha256:c64a6d29883d553f97edacf4185fabfa578512ffcf9ddb891c79830b69046cfc"
+          }
+        }
+      ]
+    },
+    "runDetails": {
+      "builder": {
+        "id": null
+      },
+      "metadata": {
+        "invocationId": null
+      }
+    }
+  }
+}
