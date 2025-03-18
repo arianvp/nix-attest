@@ -32,7 +32,7 @@ writeShellApplication {
     inputSrcs=$(jq -r -n --argjson derivation "$derivation" '$derivation.inputSrcs[]')
 
     resolvedDependencies=$({ echo "$inputDrvs"; echo "$inputSrcs"; } | while IFS= read -r path; do
-        dep=$(nix path-info "$path" --json | jq 'to_entries | map({name:.key, digest:{narHash:.value.narHash}})[]')
+        dep=$(nix path-info --recursive "$path" --json | jq 'to_entries | map({name:.key, digest:{narHash:.value.narHash}})[]')
         narHash=$(echo "$dep" | jq -r '.digest.narHash')
         sha256="sha256:$(nix hash convert --to base16 "$narHash")"
         echo "$dep" | jq --arg sha256 "$sha256" '.digest.sha256=$sha256'
