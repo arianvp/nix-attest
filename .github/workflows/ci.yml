@@ -30,12 +30,18 @@ jobs:
           builderId="$GITHUB_SERVER_URL/$GITHUB_WORKFLOW_REF"
           invocationId="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           export builderId invocationId
+          mkdir -p /nix/var/nix/provenance
+          cd /nix/var/nix/provenance
           exec "$hook" "\$@"
           EOF
           chmod +x "$new_hook"
 
           build=$(nix --post-build-hook "$new_hook" build --json --print-build-logs "$installable")
           echo "build=$build" >> "$GITHUB_OUTPUT"
+
+
+      # 
+
       # NOTE: the attestation contains multiple subjects (one for each output)
       # but the actions/attest action only supports one subject. So we need to
       # pick one. We pick the first one.
@@ -53,7 +59,6 @@ jobs:
           echo "subject-name=$subjectName" >> "$GITHUB_OUTPUT"
           jq '.predicate' "$statementPath" > predicate.slsa.json
         env:
-          # TODO: maybe we should generate a statement per outPath instead of per drv
           statementPath: "/nix/var/nix/provenance${{fromJson(steps.build.outputs.build)[0].drvPath}}.slsa.json"
       - name: Attest
         uses: actions/attest@v2
