@@ -22,7 +22,7 @@ jobs:
           installable: .#example^*
         run: |
           set -o pipefail
-          hook=$(nix build .#hook --print-out-paths)
+          hook=$(nix build .#nix-attest-post-build-hook --print-out-paths)
 
           new_hook=$(mktemp)
           cat <<EOF > "$new_hook"
