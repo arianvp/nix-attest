@@ -14,8 +14,7 @@ jobs:
     outputs:
       path-info: ${{ steps.build.outputs.path-info }}
     steps:
-      - uses: DeterminateSystems/nix-installer-action@main
-      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: DeterminateSystems/nix-installer-action@v16
       - uses: actions/checkout@v4
       - id: build
         name: Build
@@ -23,7 +22,7 @@ jobs:
           installable: .#example^*
         run: |
           set -o pipefail
-          hook=$(nix build .#hook --print-out-paths)
+          hook=$(nix build .#nix-attest-post-build-hook --print-out-paths)/bin/nix-attest-post-build-hook
 
           new_hook=$(mktemp)
           cat <<EOF > "$new_hook"
@@ -31,12 +30,18 @@ jobs:
           builderId="$GITHUB_SERVER_URL/$GITHUB_WORKFLOW_REF"
           invocationId="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           export builderId invocationId
+          mkdir -p /nix/var/nix/provenance
+          cd /nix/var/nix/provenance
           exec "$hook" "\$@"
           EOF
           chmod +x "$new_hook"
 
           build=$(nix --post-build-hook "$new_hook" build --json --print-build-logs "$installable")
           echo "build=$build" >> "$GITHUB_OUTPUT"
+
+
+      # 
+
       # NOTE: the attestation contains multiple subjects (one for each output)
       # but the actions/attest action only supports one subject. So we need to
       # pick one. We pick the first one.
@@ -47,15 +52,14 @@ jobs:
         name: Get subject
         run:  |
           set -o pipefail
-          jq . "$statementPath"
+          statementPath="/nix/var/nix/provenance/$(basename "$drvPath").slsa.json"
           subjectDigest=$(jq -r '.subject[0].digest.sha256' "$statementPath")
           subjectName=$(jq -r '.subject[0].name' "$statementPath")
           echo "subject-digest=sha256:$subjectDigest" >> "$GITHUB_OUTPUT"
           echo "subject-name=$subjectName" >> "$GITHUB_OUTPUT"
           jq '.predicate' "$statementPath" > predicate.slsa.json
         env:
-          # TODO: maybe we should generate a statement per outPath instead of per drv
-          statementPath: "/nix/var/nix/provenance${{fromJson(steps.build.outputs.build)[0].drvPath}}.slsa.json"
+          drvPath: "${{fromJson(steps.build.outputs.build)[0].drvPath}}"
       - name: Attest
         uses: actions/attest@v2
         with:
@@ -71,6 +75,6 @@ jobs:
       - name: Verify
         run: |
           set -o pipefail
-          gh attestation verify --repo "$GITHUB_REPOSITORY" <(nix store dump-path .#example)
+          gh attestation verify --predicate-type https://nixos.org/provenance/v1 --repo "$GITHUB_REPOSITORY" <(nix store dump-path .#example)
         env:
           GH_TOKEN: ${{ github.token }}
