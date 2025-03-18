@@ -75,6 +75,6 @@ jobs:
       - name: Verify
         run: |
           set -o pipefail
-          gh attestation verify --repo "$GITHUB_REPOSITORY" <(nix store dump-path .#example)
+          gh attestation verify --predicate-type https://nixos.org/provenance/v1 --repo "$GITHUB_REPOSITORY" <(nix store dump-path .#example)
         env:
           GH_TOKEN: ${{ github.token }}
