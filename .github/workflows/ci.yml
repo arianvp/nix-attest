@@ -52,14 +52,14 @@ jobs:
         name: Get subject
         run:  |
           set -o pipefail
-          jq . "$statementPath"
+          statementPath="/nix/var/nix/provenance/$(basename "$drvPath").slsa.json"
           subjectDigest=$(jq -r '.subject[0].digest.sha256' "$statementPath")
           subjectName=$(jq -r '.subject[0].name' "$statementPath")
           echo "subject-digest=sha256:$subjectDigest" >> "$GITHUB_OUTPUT"
           echo "subject-name=$subjectName" >> "$GITHUB_OUTPUT"
           jq '.predicate' "$statementPath" > predicate.slsa.json
         env:
-          statementPath: "/nix/var/nix/provenance${{fromJson(steps.build.outputs.build)[0].drvPath}}.slsa.json"
+          drvPath: "${{fromJson(steps.build.outputs.build)[0].drvPath}}"
       - name: Attest
         uses: actions/attest@v2
         with:
